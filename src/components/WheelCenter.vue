@@ -1,5 +1,5 @@
 <template>
-	<div class="pbs-c-hovered-show">
+	<div class="pbs-c-hovered-show" ref="wheelCenter">
 		<svg
 			class="pbs-c-wheel-left-arc"
 			xmlns="http://www.w3.org/2000/svg"
@@ -22,8 +22,13 @@
 			/>
 		</svg>
 
-		<p v-if="hoveredShow">
-			<span>{{ hoveredShow.title }}</span>
+		<p
+			v-if="hoveredShow"
+			:style="{
+				fontSize: `${showFontSize}px`,
+			}"
+		>
+			{{ hoveredShow.title }}
 		</p>
 	</div>
 </template>
@@ -31,12 +36,31 @@
 <script>
 export default {
 	name: 'WheelCenter',
+	data() {
+		return {
+			wheelCenterWidth: null,
+		};
+	},
 	props: {
 		focusedShow: {
 			type: Object,
 		},
 		hoveredShow: {
 			type: Object,
+		},
+	},
+	mounted() {
+		const data = this;
+
+		data.wheelCenterWidth = this.$refs.wheelCenter.offsetWidth;
+
+		window.addEventListener('resize', () => {
+			data.wheelCenterWidth = this.$refs.wheelCenter.offsetWidth;
+		});
+	},
+	computed: {
+		showFontSize() {
+			return this.wheelCenterWidth / 10;
 		},
 	},
 };
@@ -71,7 +95,6 @@ svg {
 p {
 	color: var(--pbs-orange-400);
 	display: block;
-	font-size: 2.5vw;
 	hyphens: auto;
 	line-height: 1.25;
 	margin: 0;
@@ -79,11 +102,5 @@ p {
 	text-align: center;
 	top: 26.5%;
 	transform: translate(0, -50%);
-}
-
-@media only screen and (min-width: 1200px) {
-	p {
-		font-size: 1.875rem;
-	}
 }
 </style>

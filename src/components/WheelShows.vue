@@ -16,10 +16,10 @@
 			>
 				<a
 					:href="show.href"
-					@focus="$emit('focus-show', show)"
-					@blur="$emit('focus-show', null)"
-					@mouseenter="$emit('hover-show', show)"
-					@mouseleave="$emit('hover-show', null)"
+					@focus="$emit('focus-or-hover-show', { show: show })"
+					@blur="$emit('focus-or-hover-show', { show: null })"
+					@mouseenter="$emit('focus-or-hover-show', { show: show })"
+					@mouseleave="$emit('focus-or-hover-show', { show: null })"
 				>
 					<picture>
 						<source :srcset="show.images.avif" type="image/avif" />
@@ -78,7 +78,7 @@ li {
 }
 
 a {
-	margin-block-start: 2vw;
+	margin-block-start: 20%;
 	transition-duration: 0.25s;
 	transition-property: transform;
 	width: 60%;
@@ -92,11 +92,5 @@ img {
 	aspect-ratio: 1 / 1;
 	display: block;
 	width: 100%;
-}
-
-@media only screen and (min-width: 1200px) {
-	a {
-		margin-block-start: 24px;
-	}
 }
 </style>

@@ -1,4 +1,6 @@
 <template>
+	<h1 class="pbs-u-sr-only">PBS KIDS shows navigation</h1>
+
 	<TheWheel :shows="shows" />
 
 	<div class="pbs-c-games"></div>

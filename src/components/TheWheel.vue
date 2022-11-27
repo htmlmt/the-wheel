@@ -1,14 +1,24 @@
 <template>
-	<div :class="wheelStateClass" class="pbs-c-wheel" v-if="shuffledShows">
+	<div
+		:class="wheelStateClass"
+		:style="{
+			marginBottom: wheelMarginBottom + 'px',
+		}"
+		class="pbs-c-wheel"
+		v-if="shuffledShows"
+	>
 		<h2 class="pbs-u-sr-only">Shows</h2>
 
 		<button
+			aria-hidden="true"
 			class="pbs-c-rotate-wheel pbs-v-rotate-wheel-left"
-			tabindex="-1"
 			type="button"
+			@click="shiftShowsClockwise"
 			@mouseenter="enterLeftRotate"
 			@mouseleave="leaveLeftRotate"
 		>
+			<span class="pbs-u-sr-only">Rotate wheel clockwise</span>
+
 			<svg class="pbs-c-rotate-arrow pbs-v-rotate-arrow-left">
 				<use xlink:href="#wheel-menu-arrow"></use>
 			</svg>
@@ -22,8 +32,7 @@
 				}"
 			>
 				<WheelShows
-					@focus-show="(show) => (hoveredShow = show)"
-					@hover-show="(show) => (hoveredShow = show)"
+					@focus-or-hover-show="focusOrHoverShow"
 					:shuffledShows="shuffledShows"
 					:totalWedges="totalWedges"
 					:visibleShows="visibleShows"
@@ -36,12 +45,14 @@
 		</div>
 
 		<button
+			aria-hidden="true"
 			class="pbs-c-rotate-wheel pbs-v-rotate-wheel-right"
-			tabindex="-1"
 			type="button"
+			@click="shiftShowsCounterClockwise"
 			@mouseenter="enterRightRotate"
 			@mouseleave="leaveRightRotate"
 		>
+			<span class="pbs-u-sr-only">Rotate wheel counter-clockwise</span>
 			<svg class="pbs-c-rotate-arrow pbs-v-rotate-arrow-right">
 				<use xlink:href="#wheel-menu-arrow"></use>
 			</svg>
@@ -87,6 +98,10 @@
 							class="pbs-c-wheel-all-shows-text"
 							d="M260.33,52.51a20.33,20.33,0,0,0,4.41,2.15,28.76,28.76,0,0,0,4.79,1.14,6,6,0,0,0,2.52-.15,7.25,7.25,0,0,0,2.35-1.06,6.88,6.88,0,0,0,1.81-1.8,5.56,5.56,0,0,0,.94-2.34,6.2,6.2,0,0,0-.21-2.93,9,9,0,0,0-1.29-2.46,13.57,13.57,0,0,0-1.83-2c-.67-.6-1.3-1.15-1.89-1.63s-1.08-.92-1.47-1.29-.56-.68-.52-.93a1,1,0,0,1,.34-.66,1.43,1.43,0,0,1,.65-.29,3.48,3.48,0,0,1,.8-.05c.28,0,.52.05.73.08a8.1,8.1,0,0,1,2.47.78c.78.39,1.54.79,2.28,1.21l1.86-5.15a21.32,21.32,0,0,0-3.81-1.52,31.44,31.44,0,0,0-4-.88,9.13,9.13,0,0,0-2.81,0,7.94,7.94,0,0,0-2.63.89,6.81,6.81,0,0,0-2,1.73,5.24,5.24,0,0,0-1.07,2.54,4.6,4.6,0,0,0,.26,2.48,8.11,8.11,0,0,0,1.31,2.16,15,15,0,0,0,1.85,1.89L268,46a13.77,13.77,0,0,1,1.43,1.37,1.49,1.49,0,0,1,.46,1.19c-.08.52-.33.81-.76.87a4.6,4.6,0,0,1-1.23,0,7.85,7.85,0,0,1-1.46-.4,12.26,12.26,0,0,1-1.57-.73,13.52,13.52,0,0,1-1.47-.92q-.69-.48-1.23-.93Z"
 						/>
+						<polygon
+							class="pbs-c-wheel-all-shows-text"
+							points="297,40 295,58.24 314,52"
+						></polygon>
 					</g>
 				</a>
 			</svg>
@@ -196,26 +211,40 @@ export default {
 			);
 		}, data.wheelTransitionDuration * 2);
 	},
+	computed: {
+		wheelMarginBottom() {
+			let wheelMarginBottom = (this.windowWidth / 4) * -1;
+
+			if (this.windowWidth > 1200) {
+				wheelMarginBottom = -300;
+			}
+
+			return wheelMarginBottom;
+		},
+	},
 	methods: {
 		enterLeftRotate() {
 			const data = this;
 
 			data.mouseOverRotateButton = true;
-			data.shiftShowsRight();
+			data.shiftShowsClockwise();
 
 			data.wheelRotationCheckInterval = setInterval(() => {
-				data.shiftShowsRight();
+				data.shiftShowsClockwise();
 			}, data.wheelTransitionDuration + 50);
 		},
 		enterRightRotate() {
 			const data = this;
 
 			data.mouseOverRotateButton = true;
-			data.shiftShowsLeft();
+			data.shiftShowsCounterClockwise();
 
 			data.wheelRotationCheckInterval = setInterval(() => {
-				data.shiftShowsLeft();
+				data.shiftShowsCounterClockwise();
 			}, data.wheelTransitionDuration + 50);
+		},
+		focusOrHoverShow({ show }) {
+			this.hoveredShow = show;
 		},
 		leaveLeftRotate() {
 			this.mouseOverRotateButton = false;
@@ -225,7 +254,7 @@ export default {
 			this.mouseOverRotateButton = false;
 			clearInterval(this.wheelRotationCheckInterval);
 		},
-		shiftShowsRight() {
+		shiftShowsClockwise() {
 			const data = this;
 
 			data.wheelRotation += 360 / data.totalWedges;
@@ -260,7 +289,7 @@ export default {
 				data.visibleShows.pop();
 			}, data.wheelTransitionDuration);
 		},
-		shiftShowsLeft() {
+		shiftShowsCounterClockwise() {
 			const data = this;
 
 			data.wheelRotation -= 360 / data.totalWedges;
@@ -317,7 +346,8 @@ export default {
 <style lang="scss" scoped>
 .pbs-c-wheel {
 	aspect-ratio: 1 / 1;
-	margin: 5% auto -25%;
+	margin-block-start: 5%;
+	margin-inline: auto;
 	max-width: 600px;
 	position: relative;
 	transform-origin: 50% 50%;
@@ -504,9 +534,9 @@ export default {
 	}
 }
 
-@media only screen and (min-width: 1200px) {
+@media (min-width: 1200px) {
 	.pbs-c-wheel {
-		margin: 3.75rem auto -18.75rem;
+		margin-block-start: 60px;
 	}
 }
 
